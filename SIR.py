@@ -1,13 +1,25 @@
 #
 # Attempt to simulate an epidemic using SIR modelling
-# Initial pass uses 1 population, later to have multi community spread with origin/destination flows
+# Initial pass uses 1 population,
+# Later to add
+#   have multi community spread with origin/destination flows
+#       starting with large definitions (MSAs)
+#   infection based on distance  (closure contacts higher than more distant)
+#   differences in urban density of each community
 #
-
+# S,I,R concepts:
+#     A closed community of susceptible people, gets an infected person
+#     A person is infected for a duration then either recovers or dies
+#     While the person is infected they have a number of contacts:
+#         a subset is susceptible (original population minus those already infected, recovered or dead)
+#         of the susceptible contacts some proportion get infected
+#     So the infection spreads, iterating over time, quickly at first since many are susceptible
+#         then slower as there are fewer susceptible until the virus dies because it cant find a new host
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-population = 326000000
+population = 326000
 
 duration = 14          # how many days is an infected person sick thru recovery
 contacts = 12          # how many people does an infected person contact per day
@@ -29,8 +41,7 @@ for t in range(period):
     recovered = recovered + recovery_rate * infected[duration - 1]
     died = died + (1 - recovery_rate) * infected[duration - 1]
     # age the infected population
-    for d in range(duration):
-        infected[duration - d - 1] = infected[duration - d - 2]
+    infected[1:] = infected[:-1]
     # infect a new generation
     susceptible = np.maximum(population - np.sum(infected) - died - recovered,0)
     infected[0] = np.around(np.sum(infected) * infection_rate * contacts * (susceptible / population))
@@ -45,16 +56,4 @@ plt.style.use('seaborn-colorblind')
 plt.plot(days, cases)
 plt.show()
 
-# S,I,R concepts:
-#     A closed community of susceptible people, gets an infected person
-#     A person who is infected for a duration then either recovers or dies
-#     While the person is infected they have a number of contacts:
-#         a subset is susceptible (original population minus those already infected, recovered or dead)
-#         of the susceptible contacts some proportion get infected
-#     So the infection spreads, iterating over time, quickly at first since many are susceptible
-#         then slower as their are fewer susceptible until the virus dies because it cant find a new host
 
-# Interaction between communities:
-#     metropolitan statistical areas (MSAs)
-#     consolidated metropolitan statistical areas (CMSAs)
-#     primary metropolitan statistical areas (PMSAs)
