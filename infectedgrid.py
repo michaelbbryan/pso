@@ -1,3 +1,7 @@
+
+
+
+
 # identify the population
 # arrange them in a square
 population=100
