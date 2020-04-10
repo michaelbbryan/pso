@@ -16,3 +16,6 @@ RECOVERY_RATE: float = .97
 
 # number of days to view the process
 PERIOD: int = 180
+
+# how many people are initially sick
+INITIAL_INFECTIONS: int = 10
