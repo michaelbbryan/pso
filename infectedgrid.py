@@ -12,9 +12,10 @@ import numpy as np
 import pandas as pd
 import random
 from default_values import POPULATION, DURATION, PERIOD, INITIAL_INFECTIONS, RECOVERY_RATE
+import matplotlib.animation as an
 
 random.seed(1234)
-
+POPULATION = 10000
 assert np.sqrt(POPULATION).is_integer()  # the population should be a square
 
 # If an infected person has two layers of proximate contacts
@@ -45,7 +46,9 @@ for p in initial:
     infected[p] = True
     susceptible[p] = False
 
-for day in range(PERIOD): # iterate over time
+susceptible_history = {}
+
+for day in range(180): # iterate over time
     print("day",day,"infected",sum(infected))
     # first recover or die off those who have been infected for the DURATION
     died = 0
@@ -75,13 +78,15 @@ for day in range(PERIOD): # iterate over time
     for i in range(POPULATION):
         if infected[i]:
             infected_duration[i] += 1
-    # and capture the day's results
+    # store the day's results
     results = results.append({"Day": day,
                               "Died": died,
                               "Recovered": recovered,
                               "Infected": sum(infected),
                               "Susceptible": sum(susceptible)},
                                  ignore_index = True)
+    # and record the infection history
+    susceptible_history[day] = susceptible
 
 def infection_trend(r):
     fig = plt.figure()
@@ -90,9 +95,27 @@ def infection_trend(r):
     plt.text(160,2,(POPULATION-sum(susceptible)))
     plt.show()
 
-def heat(s):
-    heatmap = s.astype(int).reshape(int(np.sqrt(POPULATION)),int(np.sqrt(POPULATION)))
-    plt.imshow(heatmap, cmap='hot', interpolation='nearest')
-    plt.show()
 
-heat(susceptible)
+def frame_function(d):
+    #animation function for the heat function below, update the heatmap object
+    heatmap = s[d].astype(int).reshape(int(np.sqrt(POPULATION)), int(np.sqrt(POPULATION)))
+    im.set_array(heatmap)
+    return [im]
+
+def heat(s):
+    fps = 30
+    nSeconds = 6
+    fig = plt.figure( figsize=(int(np.sqrt(POPULATION)),int(np.sqrt(POPULATION))) )
+    heatmap = s[0].astype(int).reshape(int(np.sqrt(POPULATION)),int(np.sqrt(POPULATION)))
+    im = plt.imshow(heatmap, cmap='hot', interpolation='nearest')
+    anim = an.FuncAnimation(
+                               fig,
+                               frame_function,
+                               frames = fps * nSeconds,
+                               interval = 60000 / fps, # in ms
+                               )
+    plt.show()
+    #anim.save('test_anim.mp4', fps=fps, extra_args=['-vcodec', 'libx264'])
+    return()
+
+heat(susceptible_history)
