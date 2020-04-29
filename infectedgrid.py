@@ -29,7 +29,7 @@ PROXIMATE_PROB = np.array([[0.005, 0.005, 0.005, 0.005, 0.005], \
 # Dampen prox probability to 14 day expected value of 3 infections
 for x in range(5):
     for y in range(5):
-        PROXIMATE_PROB[x,y] = (3/14) * PROXIMATE_PROB[x,y]
+        PROXIMATE_PROB[x,y] = (7/14) * PROXIMATE_PROB[x,y]
 
 # Initialize the city as a list of people
 #      each person starts Infected=False, Susceptibe=True
@@ -95,10 +95,9 @@ def infection_trend(r):
     plt.text(160,2,(POPULATION-sum(susceptible)))
     plt.show()
 
-
 def frame_function(d):
     #animation function for the heat function below, update the heatmap object
-    heatmap = s[d].astype(int).reshape(int(np.sqrt(POPULATION)), int(np.sqrt(POPULATION)))
+    heatmap = susceptible_history[d].astype(int).reshape(int(np.sqrt(POPULATION)), int(np.sqrt(POPULATION)))
     im.set_array(heatmap)
     return [im]
 
@@ -111,8 +110,8 @@ def heat(s):
     anim = an.FuncAnimation(
                                fig,
                                frame_function,
-                               frames = fps * nSeconds,
-                               interval = 60000 / fps, # in ms
+                               frames = 1800, # fps * nSeconds,
+                               interval = 100 # 60000 / fps, # in ms
                                )
     plt.show()
     #anim.save('test_anim.mp4', fps=fps, extra_args=['-vcodec', 'libx264'])
